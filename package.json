@@ -1,0 +1,23 @@
+{
+    "name": "@types/ipfs-http-client",
+    "version": "47.0.1",
+    "description": "TypeScript definitions for ipfs-http-client",
+    "license": "MIT",
+    "contributors": [],
+    "main": "",
+    "types": "index.d.ts",
+    "scripts": {},
+    "author": "@kodex/wizardsorb",
+    "homepage": "https://kodexdata.systems",
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typeScriptVersion": "4.0.3",
+    "devDependencies": {
+      "bignumber.js": "^9.0.1",
+      "ipfs-http-client": "47.0.1",
+      "ipld-block": "^0.11.0",
+      "multiaddr": "^8.0.0",
+      "peer-id": "^0.14.2"
+    }
+}
