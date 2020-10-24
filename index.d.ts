@@ -410,7 +410,10 @@ declare module "ipfs-http-client" {
   }
   
   export interface DhtPeersResponse {
-    id: String, addrs: Multiaddr[]
+    /** is a String the peer's ID */
+    id: String,
+    /** an array of Multiaddr - addresses for the peer. */
+    addrs: Multiaddr[]
   }
   
   export interface DhtFindProvsOptions extends TimeoutOptions {
@@ -447,7 +450,9 @@ declare module "ipfs-http-client" {
   }
   
   export interface KeyGenOptions extends TimeoutOptions {
+    /** The key type, one of `rsa` or `ed25519` */
     type?: KeyGenAlgos
+    /** The key size in bits */
     size?: number
   }
   
@@ -457,25 +462,36 @@ declare module "ipfs-http-client" {
   }
   
   export interface NamePublishOptions extends TimeoutOptions {
+    /** Resolve given path before publishing */
     resolve?: boolean
+    /** Time duration of the record */
     lifetime?: string | "24h"
+    /** Time duration this record should be cached */
     ttl?: string
+    /** Name of the key to be used */
     key?: string | "self"
+    /** When offline, save the IPNS record to the the local datastore without broadcasting to the network instead of simply failing. */
     allowOffline?: boolean
   }
   
   export interface NameResolveOptions extends TimeoutOptions {
+    /** Resolve until the result is not an IPNS name */
     recursive?: boolean
+    /** Do not use cached entries */
     nocache?: boolean
   }
   
   export interface ObjectNewOptions extends TimeoutOptions {
+    /** If defined, must be a string unixfs-dir and if that is passed, the created node will be an empty unixfs style directory */
     template?: string
+    /** Resolve until the result is not an IPNS name */
     recursive?: boolean
+    /** Do not use cached entries */
     nocache?: boolean
   }
   
   export interface ObjectPutOptions extends TimeoutOptions {
+    /** The encoding of the Uint8Array (json, yml, etc), if passed a Uint8Array */
     enc?: "json" | "yaml" | string
   }
   
@@ -521,10 +537,12 @@ declare module "ipfs-http-client" {
   }
   
   export interface RepoGcOptions extends TimeoutOptions {
+    /** Write minimal output */
     quiet?: boolean
   }
   
   export interface RepoStatOptions extends TimeoutOptions {
+    /** Return storage numbers in `MiB` */
     human?: boolean
   }
   
@@ -739,67 +757,106 @@ declare module "ipfs-http-client" {
     }
   
     dht: {
-      findPeers(peerId: CID | PeerId, options?: TimeoutOptions): Promise<DhtPeersResponse>
+      /** Find the multiaddresses associated with a Peer ID */
+      findPeer(peerId: CID | PeerId, options?: TimeoutOptions): Promise<DhtPeersResponse>
+      /** Find peers that can provide a specific value, given a CID. */
       findProvs(cid: CID, options?: DhtFindProvsOptions): AsyncIterable<DhtPeersResponse>
+      /** Given a key, query the routing system for its best value. */
       get(key: string | Uint8Array, options?: TimeoutOptions): Promise<Uint8Array>
+      /** Write a key/value pair to the routing system. */
       put(key: Uint8Array, value: Uint8Array, options?: TimeoutOptions): AsyncIterable<DhtProvideResponse>
+      /** Announce to the network that you are providing given values. */
       provide(cid: CID | CID[], options?: DhtProvideOptions): AsyncIterable<DhtProvideResponse>
+      /** Find the closest Peer IDs to a given Peer ID by querying the DHT. */
       query(peerId: PeerId | CID, options?: TimeoutOptions): AsyncIterable<DhtProvideResponse>
     }
   
     key: {
+      /** Remove a key */
       rm(name: string, options?: KeyGenOptions): Promise<KeyResponse>
+      /** Generate a new key */
       gen(name: string, options?: KeyGenOptions): Promise<KeyResponse>
+      /** List all the keys */
       list(name: string, options?: TimeoutOptions): Promise<KeyResponse[]>
+      /** Rename a key */
       rename(oldName: string, newName: string, options?: TimeoutOptions): Promise<KeyRenameResponse>
+      /** Export a key in a PEM encoded password protected PKCS #8 */
       export(name: string, password: string, options?: TimeoutOptions): Promise<string>
+      /** Import a PEM encoded password protected PKCS #8 key */
       import(name: string, pem: string, password: string, options?: TimeoutOptions): Promise<KeyResponse>
     }
   
     name: {
+      /** Resolve an IPNS name. */
       resolve(name: string, options?: NameResolveOptions): AsyncIterable<string>
+      /** Publish an IPNS name with a given value. */
       publish(value: CID, options?: NamePublishOptions): Promise<NameResponse>
   
       pubsub: {
+        /** Show current name subscriptions */
         subs(options?: TimeoutOptions): Promise<string[]>
+        /** Query the state of IPNS pubsub */
         state(options?: TimeoutOptions): Promise<{ enabled: boolean }>
+        /** Cancel a name subscription */
         cancel(name: string, options?: TimeoutOptions): Promise<{ canceled: boolean }>
       }
     }
   
     object: {
+      /** Create a new MerkleDAG node, using a specific layout. Caveat: So far, only UnixFS object layouts are supported. */
       ["new"](options?: ObjectNewOptions): Promise<CID>
+      /** Store a MerkleDAG node. */
       put(obj: { Data: Uint8Array | Buffer; Links: any[] } | Uint8Array | any, options?: ObjectPutOptions): Promise<CID>
+      /** Fetch a MerkleDAG node */
       get(cid: CID, options?: TimeoutOptions): Promise<any>
+      /** Returns the Data field of an object */
       data(cid: CID, options?: TimeoutOptions): Promise<Uint8Array>
+      /** Returns the Links field of an object */
       links(cid: CID, options?: TimeoutOptions): Promise<string[]>
+      /** Returns stats about an Object */
       stat(cid: CID, options?: TimeoutOptions): Promise<ObjectStatResponse>
       patch: {
+        /** Add a Link to an existing MerkleDAG Object */
         addLink(cid: CID, link: DagLinkObject, options?: TimeoutOptions): Promise<CID>
+        /** Remove a Link from an existing MerkleDAG Object */
         rmLink(cid: CID, link: DagLinkObject, options?: TimeoutOptions): Promise<CID>
+        /** Append Data to the Data field of an existing node */
         appendData(cid: CID, data: Uint8Array, options?: TimeoutOptions): Promise<CID>
+        /** Overwrite the Data field of a DAGNode with new Data */
         setData(cid: CID, data: Uint8Array, options?: TimeoutOptions): Promise<CID>
       }
     }
   
     pubsub: {
+      /** Subscribe to a pubsub topic. */
       subscribe(topic: string, handler: (msg: PubSubHandlerObject) => void, options?: TimeoutOptions): Promise<void>
+      /** Unsubscribes from a pubsub topic. */
       unsubscribe(topic: string, handler: (msg: PubSubHandlerObject) => void, options?: TimeoutOptions): Promise<void>
+      /** Publish a data message to a pubsub topic. */
       publish(topic: string, data: string | Uint8Array, options?: TimeoutOptions): Promise<void>
+      /** Returns the list of subscriptions the peer is subscribed to. */
       ls(options?: TimeoutOptions): Promise<string[]>
+      /** Returns the peers that are subscribed to one topic. */
       peers(topic: string, options?: TimeoutOptions): Promise<string[]>
     }
   
     repo: {
+      /** Perform a garbage collection sweep on the repo. */
       gc(options?: RepoGcOptions): AsyncIterable<RepoGcResponse>
+      /** Get stats for the currently used repo. */
       stat(options?: RepoStatOptions): Promise<RepoStatReturn>
+      /** Show the repo version. */
       version(options?: TimeoutOptions): Promise<string>
     }
   
     bitswap: {
+      /** Returns the wantlist for your node */
       wantlist(options?: TimeoutOptions): Promise<CID[]>
+      /** Returns the wantlist for a connected peer */
       wantlistForPeer(peerId: PeerId | CID | Uint8Array | string, options?: TimeoutOptions): Promise<CID[]>
+      /** Removes one or more CIDs from the wantlist */
       unwant(cids: CID | CID[], options?: TimeoutOptions): Promise<void>
+      /** Show diagnostic information on the bitswap agent. */
       stat(options?: TimeoutOptions): Promise<BitswapStatResponse>
     }
   }
